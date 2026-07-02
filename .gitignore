@@ -1,0 +1,7 @@
+backend/target/
+.vscode/
+.DS_Store
+*.log
+all/
+fastprint_mobile/
+files(9)/
