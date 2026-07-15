@@ -33,9 +33,14 @@ public class Tarif {
     @Column(name = "date_maj")
     private LocalDateTime dateMaj;
 
-    // --- Relations ---
     @OneToMany(mappedBy = "tarif", fetch = FetchType.LAZY)
     private List<Document> documents;
+
+    @PrePersist
+    @PreUpdate
+    public void preModification() {
+        this.dateMaj = LocalDateTime.now();
+    }
 
     public enum TypeImpression {
         noir_et_blanc, couleur

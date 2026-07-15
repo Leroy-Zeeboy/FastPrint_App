@@ -16,21 +16,24 @@ public class GlobalExceptionHandler {
 
     // Gère les erreurs de validation (@Valid, @NotBlank, @Email...)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
+public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(
+        MethodArgumentNotValidException ex) {
 
-        Map<String, String> erreurs = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String champ = ((FieldError) error).getField();
-            String message = error.getDefaultMessage();
-            erreurs.put(champ, message);
-        });
+    Map<String, String> erreurs = new HashMap<>();
+    ex.getBindingResult().getAllErrors().forEach(error -> {
+        String champ = ((FieldError) error).getField();
+        String message = error.getDefaultMessage();
+        erreurs.put(champ, message);
+    });
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Erreurs de validation"));
-    }
-
+    return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ApiResponse.<Map<String, String>>builder()
+                    .success(false)
+                    .message("Erreurs de validation")
+                    .data(erreurs)
+                    .build());
+}
     // Gère les RuntimeException (ex. "Email déjà utilisé")
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(

@@ -35,9 +35,14 @@ public class ForfaitFinition {
     @Column(name = "date_maj")
     private LocalDateTime dateMaj;
 
-    // --- Relations ---
     @OneToMany(mappedBy = "forfaitFinition", fetch = FetchType.LAZY)
     private List<Document> documents;
+
+    @PrePersist
+    @PreUpdate
+    public void preModification() {
+        this.dateMaj = LocalDateTime.now();
+    }
 
     public enum TypeForfait {
         standard, premium
