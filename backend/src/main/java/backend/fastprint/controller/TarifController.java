@@ -1,6 +1,7 @@
 package backend.fastprint.controller;
 
 import backend.fastprint.dto.ApiResponse;
+import backend.fastprint.dto.TarifResponse;
 import backend.fastprint.entity.Tarif;
 import backend.fastprint.service.TarifService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class TarifController {
 
     // GET /api/tarifs — accessible à tous (visiteur, client, gérant, admin)
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Tarif>>> getTousLesTarifs() {
+    public ResponseEntity<ApiResponse<List<TarifResponse>>> getTousLesTarifs() {
         return ResponseEntity.ok(
             ApiResponse.success("Tarifs récupérés", tarifService.getTousLesTarifs())
         );
@@ -27,10 +28,20 @@ public class TarifController {
 
     // GET /api/tarifs/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Tarif>> getTarifParId(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<TarifResponse>> getTarifParId(@PathVariable Long id) {
         return ResponseEntity.ok(
-            ApiResponse.success("Tarif récupéré", tarifService.getTarifParId(id))
+            ApiResponse.success("Tarif récupéré", toResponse(tarifService.getTarifParId(id)))
         );
+    }
+
+    // Convertit l'entité Tarif en DTO, sans exposer les relations JPA (utilisateur, documents...)
+    private TarifResponse toResponse(Tarif tarif) {
+        return TarifResponse.builder()
+            .idTarif(tarif.getIdTarif())
+            .typeImpression(tarif.getTypeImpression().name())
+            .disposition(tarif.getDisposition().name())
+            .prixUnitaire(tarif.getPrixUnitaire())
+            .build();
     }
 
     // POST /api/admin/tarifs — admin uniquement

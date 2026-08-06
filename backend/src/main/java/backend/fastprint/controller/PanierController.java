@@ -2,8 +2,8 @@ package backend.fastprint.controller;
 
 import backend.fastprint.dto.ApiResponse;
 import backend.fastprint.dto.AjouterAuPanierRequest;
-import backend.fastprint.entity.CommandeAccessoire;
-import backend.fastprint.entity.Panier;
+import backend.fastprint.dto.CommandeAccessoireResponse;
+import backend.fastprint.dto.PanierResponse;
 import backend.fastprint.entity.Utilisateur;
 import backend.fastprint.service.PanierService;
 import jakarta.validation.Valid;
@@ -22,17 +22,17 @@ public class PanierController {
 
     // Voir son panier
     @GetMapping
-    public ResponseEntity<ApiResponse<Panier>> getMonPanier(
+    public ResponseEntity<ApiResponse<PanierResponse>> getMonPanier(
             @AuthenticationPrincipal Utilisateur client) {
         return ResponseEntity.ok(
             ApiResponse.success("Panier récupéré",
-                panierService.getOuCreerPanier(client))
+                panierService.getMonPanier(client))
         );
     }
 
     // Ajouter un article au panier
     @PostMapping
-    public ResponseEntity<ApiResponse<Panier>> ajouterAuPanier(
+    public ResponseEntity<ApiResponse<PanierResponse>> ajouterAuPanier(
             @Valid @RequestBody AjouterAuPanierRequest request,
             @AuthenticationPrincipal Utilisateur client) {
         return ResponseEntity.ok(
@@ -64,7 +64,7 @@ public class PanierController {
 
     // Valider le panier → crée une commande
     @PostMapping("/valider")
-    public ResponseEntity<ApiResponse<CommandeAccessoire>> validerPanier(
+    public ResponseEntity<ApiResponse<CommandeAccessoireResponse>> validerPanier(
             @AuthenticationPrincipal Utilisateur client) {
         return ResponseEntity.ok(
             ApiResponse.success("Commande créée avec succès",

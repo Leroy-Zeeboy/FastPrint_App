@@ -1,5 +1,6 @@
 package backend.fastprint.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "forfait_finition")
+@ToString(exclude = "documents")
 public class ForfaitFinition {
 
     @Id
@@ -35,6 +37,7 @@ public class ForfaitFinition {
     @Column(name = "date_maj")
     private LocalDateTime dateMaj;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "forfaitFinition", fetch = FetchType.LAZY)
     private List<Document> documents;
 

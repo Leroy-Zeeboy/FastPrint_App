@@ -1,12 +1,19 @@
 package backend.fastprint.service;
 
+import backend.fastprint.dto.AccessoireRequest;
 import backend.fastprint.entity.Accessoire;
 import backend.fastprint.entity.Utilisateur;
 import backend.fastprint.repository.AccessoireRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -14,9 +21,16 @@ public class AccessoireService {
 
     private final AccessoireRepository accessoireRepository;
 
+    private static final String DOSSIER_UPLOAD = "uploads/accessoires";
+
     // Catalogue public — tous les accessoires actifs
     public List<Accessoire> getCatalogue() {
         return accessoireRepository.findByActifTrue();
+    }
+
+    // Gérant : tous les accessoires (actifs et désactivés)
+    public List<Accessoire> getTousLesAccessoires() {
+        return accessoireRepository.findAll();
     }
 
     // Détail d'un accessoire
@@ -25,20 +39,44 @@ public class AccessoireService {
                 .orElseThrow(() -> new RuntimeException("Accessoire introuvable"));
     }
 
-    // Gérant : publier un accessoire
-    public Accessoire publierAccessoire(Accessoire accessoire, Utilisateur gerant) {
-    accessoire.setPubliePar(gerant);
-    accessoire.setActif(true);
-    return accessoireRepository.save(accessoire);
-}
+    // Gérant : publier un accessoire (avec image optionnelle)
+    public Accessoire publierAccessoire(
+            AccessoireRequest request,
+            MultipartFile image,
+            Utilisateur gerant) {
 
-    // Gérant : modifier un accessoire
-    public Accessoire modifierAccessoire(Long id, Accessoire accessoireModifie) {
+        Accessoire accessoire = Accessoire.builder()
+                .nom(request.getNom())
+                .description(request.getDescription())
+                .prix(request.getPrix())
+                .quantiteStock(request.getQuantiteStock())
+                .publiePar(gerant)
+                .actif(true)
+                .build();
+
+        if (image != null && !image.isEmpty()) {
+            accessoire.setCheminImage(enregistrerImage(image));
+        }
+
+        return accessoireRepository.save(accessoire);
+    }
+
+    // Gérant : modifier un accessoire (avec remplacement d'image optionnel)
+    public Accessoire modifierAccessoire(
+            Long id,
+            AccessoireRequest request,
+            MultipartFile image) {
+
         Accessoire accessoire = getAccessoireParId(id);
-        accessoire.setNom(accessoireModifie.getNom());
-        accessoire.setDescription(accessoireModifie.getDescription());
-        accessoire.setPrix(accessoireModifie.getPrix());
-        accessoire.setQuantiteStock(accessoireModifie.getQuantiteStock());
+        accessoire.setNom(request.getNom());
+        accessoire.setDescription(request.getDescription());
+        accessoire.setPrix(request.getPrix());
+        accessoire.setQuantiteStock(request.getQuantiteStock());
+
+        if (image != null && !image.isEmpty()) {
+            accessoire.setCheminImage(enregistrerImage(image));
+        }
+
         return accessoireRepository.save(accessoire);
     }
 
@@ -47,5 +85,37 @@ public class AccessoireService {
         Accessoire accessoire = getAccessoireParId(id);
         accessoire.setActif(false);
         accessoireRepository.save(accessoire);
+    }
+
+    // Gérant : réactiver un accessoire
+    public void reactiverAccessoire(Long id) {
+        Accessoire accessoire = getAccessoireParId(id);
+        accessoire.setActif(true);
+        accessoireRepository.save(accessoire);
+    }
+
+    // Enregistre le fichier image sur disque et renvoie le chemin public (relatif)
+    private String enregistrerImage(MultipartFile image) {
+        try {
+            Path dossier = Paths.get(DOSSIER_UPLOAD);
+            if (!Files.exists(dossier)) {
+                Files.createDirectories(dossier);
+            }
+
+            String extension = "";
+            String nomOriginal = image.getOriginalFilename();
+            if (nomOriginal != null && nomOriginal.contains(".")) {
+                extension = nomOriginal.substring(nomOriginal.lastIndexOf("."));
+            }
+
+            String nomFichier = UUID.randomUUID() + extension;
+            Path destination = dossier.resolve(nomFichier);
+            Files.copy(image.getInputStream(), destination);
+
+            // Chemin public servi par WebConfig (voir /uploads/accessoires/**)
+            return "/uploads/accessoires/" + nomFichier;
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement de l'image", e);
+        }
     }
 }

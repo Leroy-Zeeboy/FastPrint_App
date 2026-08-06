@@ -30,6 +30,9 @@ public class Accessoire {
     @Column(name = "quantite_stock", nullable = false)
     private Integer quantiteStock;
 
+    @Column(name = "chemin_image", length = 500)
+    private String cheminImage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_publie_par", nullable = false)
     private Utilisateur publiePar;

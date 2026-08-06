@@ -1,5 +1,6 @@
 package backend.fastprint.service;
 
+import backend.fastprint.dto.TarifResponse;
 import backend.fastprint.entity.Tarif;
 import backend.fastprint.repository.TarifRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +15,16 @@ public class TarifService {
     private final TarifRepository tarifRepository;
 
     // Récupérer tous les tarifs (accessible à tous)
-    public List<Tarif> getTousLesTarifs() {
-        return tarifRepository.findAll();
-    }
-
+    public List<TarifResponse> getTousLesTarifs() {
+    return tarifRepository.findAll().stream()
+        .map(t -> TarifResponse.builder()
+            .idTarif(t.getIdTarif())
+            .typeImpression(t.getTypeImpression().name())
+            .disposition(t.getDisposition().name())
+            .prixUnitaire(t.getPrixUnitaire())
+            .build())
+        .toList();
+}
     // Récupérer un tarif par ID
     public Tarif getTarifParId(Long id) {
         return tarifRepository.findById(id)

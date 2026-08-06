@@ -1,5 +1,6 @@
 package backend.fastprint.service;
 
+import backend.fastprint.dto.NotificationResponse;
 import backend.fastprint.entity.Notification;
 import backend.fastprint.entity.Utilisateur;
 import backend.fastprint.repository.NotificationRepository;
@@ -15,19 +16,25 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     // Récupérer toutes les notifications de l'utilisateur connecté
-    public List<Notification> getMesNotifications(Utilisateur utilisateur) {
+    public List<NotificationResponse> getMesNotifications(Utilisateur utilisateur) {
         return notificationRepository
-                .findByDestinataireOrderByDateEnvoiDesc(utilisateur);
+                .findByDestinataireOrderByDateEnvoiDesc(utilisateur)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     // Récupérer uniquement les notifications non lues
-    public List<Notification> getMesNotificationsNonLues(Utilisateur utilisateur) {
+    public List<NotificationResponse> getMesNotificationsNonLues(Utilisateur utilisateur) {
         return notificationRepository
-                .findByDestinataireAndLuFalse(utilisateur);
+                .findByDestinataireAndLuFalse(utilisateur)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     // Marquer une notification comme lue
-    public Notification marquerCommeLue(Long id, Utilisateur utilisateur) {
+    public NotificationResponse marquerCommeLue(Long id, Utilisateur utilisateur) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification introuvable"));
 
@@ -37,7 +44,8 @@ public class NotificationService {
         }
 
         notification.setLu(true);
-        return notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+        return toResponse(notification);
     }
 
     // Marquer toutes les notifications comme lues
@@ -52,5 +60,15 @@ public class NotificationService {
     public long compterNonLues(Utilisateur utilisateur) {
         return notificationRepository
                 .findByDestinataireAndLuFalse(utilisateur).size();
+    }
+
+    private NotificationResponse toResponse(Notification notification) {
+        return NotificationResponse.builder()
+                .idNotification(notification.getIdNotification())
+                .type(notification.getType())
+                .message(notification.getMessage())
+                .lu(notification.getLu())
+                .dateEnvoi(notification.getDateEnvoi())
+                .build();
     }
 }

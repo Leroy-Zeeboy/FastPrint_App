@@ -1,5 +1,6 @@
 package backend.fastprint.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "utilisateur")
+@ToString(exclude = {"motDePasse", "documents", "notifications"})
 public class Utilisateur {
 
     @Id
@@ -30,6 +32,7 @@ public class Utilisateur {
     @Column(name = "telephone", length = 30)
     private String telephone;
 
+    @JsonIgnore
     @Column(name = "mot_de_passe", nullable = false, length = 255)
     private String motDePasse;
 
@@ -44,9 +47,11 @@ public class Utilisateur {
     @Column(name = "date_creation", nullable = false, updatable = false)
     private LocalDateTime dateCreation;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private List<Document> documents;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "destinataire", fetch = FetchType.LAZY)
     private List<Notification> notifications;
 

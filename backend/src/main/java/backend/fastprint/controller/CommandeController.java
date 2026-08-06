@@ -39,6 +39,15 @@ public class CommandeController {
         );
     }
 
+    // Gérant : historique des commandes déjà traitées
+    @GetMapping("/traitees")
+    public ResponseEntity<ApiResponse<Object>> getCommandesTraitees() {
+        return ResponseEntity.ok(
+            ApiResponse.success("Historique des commandes récupéré",
+                commandeService.getCommandesTraitees())
+        );
+    }
+
     // Gérant : détail d'une commande
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CommandeResponse>> getCommandeParId(

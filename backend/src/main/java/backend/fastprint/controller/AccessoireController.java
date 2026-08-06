@@ -1,5 +1,7 @@
 package backend.fastprint.controller;
 
+import backend.fastprint.dto.AccessoireRequest;
+import backend.fastprint.dto.AccessoireResponse;
 import backend.fastprint.dto.ApiResponse;
 import backend.fastprint.entity.Accessoire;
 import backend.fastprint.entity.Utilisateur;
@@ -8,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,42 +24,57 @@ public class AccessoireController {
 
     // Catalogue public
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Accessoire>>> getCatalogue() {
+    public ResponseEntity<ApiResponse<List<AccessoireResponse>>> getCatalogue() {
+        List<AccessoireResponse> catalogue = accessoireService.getCatalogue().stream()
+            .map(this::toResponse)
+            .toList();
         return ResponseEntity.ok(
-            ApiResponse.success("Catalogue récupéré",
-                accessoireService.getCatalogue())
+            ApiResponse.success("Catalogue récupéré", catalogue)
+        );
+    }
+
+    // Gérant : tous les accessoires (actifs + désactivés)
+    @GetMapping("/gerant/tous")
+    public ResponseEntity<ApiResponse<List<AccessoireResponse>>> getTousLesAccessoires() {
+        List<AccessoireResponse> accessoires = accessoireService.getTousLesAccessoires().stream()
+            .map(this::toResponse)
+            .toList();
+        return ResponseEntity.ok(
+            ApiResponse.success("Accessoires récupérés", accessoires)
         );
     }
 
     // Détail d'un accessoire
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Accessoire>> getAccessoireParId(
+    public ResponseEntity<ApiResponse<AccessoireResponse>> getAccessoireParId(
             @PathVariable Long id) {
         return ResponseEntity.ok(
             ApiResponse.success("Accessoire récupéré",
-                accessoireService.getAccessoireParId(id))
+                toResponse(accessoireService.getAccessoireParId(id)))
         );
     }
 
-    // Gérant : publier un accessoire
-    @PostMapping("/gerant")
-    public ResponseEntity<ApiResponse<Accessoire>> publierAccessoire(
-            @RequestBody Accessoire accessoire,
+    // Gérant : publier un accessoire (avec image optionnelle)
+    @PostMapping(value = "/gerant", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<AccessoireResponse>> publierAccessoire(
+            @ModelAttribute AccessoireRequest request,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal Utilisateur gerant) {
         return ResponseEntity.ok(
             ApiResponse.success("Accessoire publié",
-                accessoireService.publierAccessoire(accessoire, gerant))
+                toResponse(accessoireService.publierAccessoire(request, image, gerant)))
         );
     }
 
-    // Gérant : modifier un accessoire
-    @PutMapping("/gerant/{id}")
-    public ResponseEntity<ApiResponse<Accessoire>> modifierAccessoire(
+    // Gérant : modifier un accessoire (avec remplacement d'image optionnel)
+    @PutMapping(value = "/gerant/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<AccessoireResponse>> modifierAccessoire(
             @PathVariable Long id,
-            @RequestBody Accessoire accessoire) {
+            @ModelAttribute AccessoireRequest request,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.ok(
             ApiResponse.success("Accessoire modifié",
-                accessoireService.modifierAccessoire(id, accessoire))
+                toResponse(accessoireService.modifierAccessoire(id, request, image)))
         );
     }
 
@@ -68,5 +86,28 @@ public class AccessoireController {
         return ResponseEntity.ok(
             ApiResponse.success("Accessoire désactivé", null)
         );
+    }
+
+    // Gérant : réactiver un accessoire
+    @PutMapping("/gerant/{id}/reactiver")
+    public ResponseEntity<ApiResponse<Void>> reactiverAccessoire(
+            @PathVariable Long id) {
+        accessoireService.reactiverAccessoire(id);
+        return ResponseEntity.ok(
+            ApiResponse.success("Accessoire réactivé", null)
+        );
+    }
+
+    private AccessoireResponse toResponse(Accessoire accessoire) {
+        return AccessoireResponse.builder()
+            .idAccessoire(accessoire.getIdAccessoire())
+            .nom(accessoire.getNom())
+            .description(accessoire.getDescription())
+            .prix(accessoire.getPrix())
+            .quantiteStock(accessoire.getQuantiteStock())
+            .imageUrl(accessoire.getCheminImage())
+            .datePublication(accessoire.getDatePublication())
+            .actif(accessoire.getActif())
+            .build();
     }
 }

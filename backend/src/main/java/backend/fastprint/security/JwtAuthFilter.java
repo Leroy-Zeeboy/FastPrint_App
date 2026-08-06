@@ -25,6 +25,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UtilisateurRepository utilisateurRepository;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        // Ne pas appliquer le filtre JWT sur les requêtes PREFLIGHT (OPTIONS)
+        return "OPTIONS".equalsIgnoreCase(request.getMethod());
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -32,8 +38,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
+        System.out.println(">>> [JwtAuthFilter] " + request.getMethod() + " " + request.getRequestURI());
+        System.out.println(">>> Header Authorization present: " + (authHeader != null));
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println(">>> Pas de token Bearer, requête traitée en anonyme.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -41,28 +50,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             final String token = authHeader.substring(7);
             final String email = jwtService.extraireEmail(token);
+            System.out.println(">>> Email extrait du token: " + email);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                         .orElse(null);
+                System.out.println(">>> Utilisateur trouvé en base: " + (utilisateur != null));
 
-                if (utilisateur != null && jwtService.estValide(token, email)) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    utilisateur,
-                                    null,
-                                    List.of(new SimpleGrantedAuthority(
-                                        "ROLE_" + utilisateur.getRole().name().toUpperCase()
-                                    ))
-                            );
-                    authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (utilisateur != null) {
+                    boolean valide = jwtService.estValide(token, email);
+                    System.out.println(">>> Token valide: " + valide);
+
+                    if (valide) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(
+                                        utilisateur,
+                                        null,
+                                        List.of(new SimpleGrantedAuthority(
+                                            "ROLE_" + utilisateur.getRole().name().toUpperCase()
+                                        ))
+                                );
+                        authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                        );
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        System.out.println(">>> Authentification posée avec succès pour " + email);
+                    }
                 }
             }
         } catch (Exception e) {
-            // Token invalide ou expiré → on ignore
+            System.out.println(">>> Erreur JWT: " + e.getMessage());
+            e.printStackTrace();
             SecurityContextHolder.clearContext();
         }
 

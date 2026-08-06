@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,19 @@ public class CommandeService {
     public List<CommandeResponse> getCommandesEnAttente() {
         return commandeRepository.findByStatut(StatutCommande.en_attente)
                 .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Gérant : historique des commandes déjà traitées (prêtes ou refusées)
+    public List<CommandeResponse> getCommandesTraitees() {
+        return commandeRepository.findAll().stream()
+                .filter(c -> c.getStatut() == StatutCommande.prete
+                    || c.getStatut() == StatutCommande.refusee)
+                .sorted(Comparator.comparing(
+                    Commande::getDateTraitement,
+                    Comparator.nullsLast(Comparator.reverseOrder())
+                ))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }

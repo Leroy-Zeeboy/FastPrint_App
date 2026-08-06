@@ -1,7 +1,7 @@
 package backend.fastprint.controller;
 
 import backend.fastprint.dto.ApiResponse;
-import backend.fastprint.entity.Notification;
+import backend.fastprint.dto.NotificationResponse;
 import backend.fastprint.entity.Utilisateur;
 import backend.fastprint.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class NotificationController {
 
     // Toutes les notifications de l'utilisateur connecté
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Notification>>> getMesNotifications(
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getMesNotifications(
             @AuthenticationPrincipal Utilisateur utilisateur) {
         return ResponseEntity.ok(
             ApiResponse.success("Notifications récupérées",
@@ -31,7 +31,7 @@ public class NotificationController {
 
     // Notifications non lues uniquement
     @GetMapping("/non-lues")
-    public ResponseEntity<ApiResponse<List<Notification>>> getMesNotificationsNonLues(
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getMesNotificationsNonLues(
             @AuthenticationPrincipal Utilisateur utilisateur) {
         return ResponseEntity.ok(
             ApiResponse.success("Notifications non lues récupérées",
@@ -51,7 +51,7 @@ public class NotificationController {
 
     // Marquer une notification comme lue
     @PutMapping("/{id}/lire")
-    public ResponseEntity<ApiResponse<Notification>> marquerCommeLue(
+    public ResponseEntity<ApiResponse<NotificationResponse>> marquerCommeLue(
             @PathVariable Long id,
             @AuthenticationPrincipal Utilisateur utilisateur) {
         return ResponseEntity.ok(
