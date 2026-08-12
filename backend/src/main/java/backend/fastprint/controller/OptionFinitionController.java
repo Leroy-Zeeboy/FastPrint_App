@@ -25,6 +25,15 @@ public class OptionFinitionController {
         );
     }
 
+    // Admin : toutes les options (actives et désactivées)
+    @GetMapping("/admin/toutes")
+    public ResponseEntity<ApiResponse<List<OptionFinition>>> getToutesLesOptions() {
+        return ResponseEntity.ok(
+            ApiResponse.success("Options récupérées",
+                optionFinitionService.getToutesLesOptions())
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<OptionFinition>> getOptionParId(
             @PathVariable Long id) {
@@ -59,6 +68,15 @@ public class OptionFinitionController {
         optionFinitionService.desactiverOption(id);
         return ResponseEntity.ok(
             ApiResponse.success("Option désactivée", null)
+        );
+    }
+
+    @PutMapping("/admin/{id}/activer")
+    public ResponseEntity<ApiResponse<Void>> activerOption(
+            @PathVariable Long id) {
+        optionFinitionService.activerOption(id);
+        return ResponseEntity.ok(
+            ApiResponse.success("Option réactivée", null)
         );
     }
 }

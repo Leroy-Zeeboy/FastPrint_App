@@ -1,5 +1,6 @@
 package backend.fastprint.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "option_finition")
+@ToString(exclude = "documents")
 public class OptionFinition {
 
     @Id
@@ -32,6 +34,7 @@ public class OptionFinition {
     private Boolean actif;
 
     // --- Relations ---
+    @JsonIgnore
     @ManyToMany(mappedBy = "optionsFinition", fetch = FetchType.LAZY)
     private List<Document> documents;
 

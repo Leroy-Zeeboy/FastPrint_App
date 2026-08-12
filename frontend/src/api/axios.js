@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // URL de base du backend Spring Boot
 const API = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: 'http://${window.location.hostname}:8080/api',
 });
 
 // Intercepteur : ajoute automatiquement le token JWT

@@ -10,6 +10,7 @@ export default function Connexion() {
   const [form, setForm] = useState({ email: '', motDePasse: '' });
   const [erreur, setErreur] = useState('');
   const [loading, setLoading] = useState(false);
+  const [voirMotDePasse, setVoirMotDePasse] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,10 +25,8 @@ export default function Connexion() {
       const res = await connexion(form);
       const { token, role, nom, prenom, email } = res.data.data;
 
-      // Sauvegarder la session
       login({ nom, prenom, email, role }, token);
 
-      // Rediriger selon le rôle
       if (role === 'administrateur') navigate('/admin');
       else if (role === 'gerant') navigate('/gerant');
       else navigate('/client');
@@ -43,13 +42,19 @@ export default function Connexion() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-md w-full max-w-md p-8">
 
-        {/* Logo + titre */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center
-                          justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">FP</span>
-          </div>
-          <h1 className="text-2xl font-bold text-primary">FastPrint</h1>
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-block mb-2">
+            <img 
+              src="/LogoFP.png" 
+              alt="Logo FastPrint" 
+              className="h-20 sm:h-24 w-auto max-w-[220px] mx-auto object-contain"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://placehold.co/180x50/0052FF/FFFFFF?text=FastPrint';
+              }}
+            />
+          </Link>
           <p className="text-gray-500 text-sm mt-1">
             Connectez-vous à votre compte
           </p>
@@ -57,8 +62,7 @@ export default function Connexion() {
 
         {/* Message d'erreur */}
         {erreur && (
-          <div className="bg-red-50 border border-red-200 text-red-700
-                          rounded-lg px-4 py-3 mb-6 text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
             {erreur}
           </div>
         )}
@@ -76,9 +80,7 @@ export default function Connexion() {
               onChange={handleChange}
               required
               placeholder="votre@email.com"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3
-                         text-sm focus:outline-none focus:ring-2
-                         focus:ring-secondary focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
             />
           </div>
 
@@ -86,31 +88,36 @@ export default function Connexion() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mot de passe
             </label>
-            <input
-              type="password"
-              name="motDePasse"
-              value={form.motDePasse}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3
-                         text-sm focus:outline-none focus:ring-2
-                         focus:ring-secondary focus:border-transparent"
-            />
+            <div className="relative">
+              <input
+                type={voirMotDePasse ? 'text' : 'password'}
+                name="motDePasse"
+                value={form.motDePasse}
+                onChange={handleChange}
+                required
+                placeholder="••••••••"
+                className="w-full border border-gray-300 rounded-lg pl-4 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setVoirMotDePasse(!voirMotDePasse)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-lg p-1"
+                title={voirMotDePasse ? "Masquer" : "Afficher"}
+              >
+                {voirMotDePasse ? '👁️' : '🙈'}
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white rounded-lg py-3 font-semibold
-                       hover:bg-secondary transition-colors disabled:opacity-60
-                       disabled:cursor-not-allowed"
+            className="w-full bg-primary text-white rounded-lg py-3 font-semibold hover:bg-secondary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
 
-        {/* Lien inscription */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Pas encore de compte ?{' '}
           <Link to="/inscription" className="text-secondary font-medium hover:underline">

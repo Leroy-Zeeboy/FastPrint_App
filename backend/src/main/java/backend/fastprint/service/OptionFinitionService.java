@@ -44,4 +44,10 @@ public class OptionFinitionService {
         option.setActif(false);
         optionFinitionRepository.save(option);
     }
+
+    public void activerOption(Long id) {
+        OptionFinition option = getOptionParId(id);
+        option.setActif(true);
+        optionFinitionRepository.save(option);
+    }
 }

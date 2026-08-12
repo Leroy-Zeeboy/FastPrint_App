@@ -10,7 +10,7 @@ import {
 const FORM_VIDE = { nom: '', description: '', prix: '', quantiteStock: '' };
 
 // Base pour les images servies statiquement (hors préfixe /api)
-const BASE_FICHIERS = 'http://localhost:8080';
+const BASE_FICHIERS = `http://${window.location.hostname}:8080`;
 
 export default function Accessoires() {
   const [catalogue, setCatalogue] = useState([]);
