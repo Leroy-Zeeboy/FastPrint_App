@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-// URL de base du backend Spring Boot
-const API = axios.create({
-  baseURL: 'http://${window.location.hostname}:8080/api',
-});
+// Priorité : variable d'environnement (production/Vercel) définie via VITE_API_URL.
+// À défaut (développement local/LAN), on déduit l'hôte automatiquement.
+const baseURL = import.meta.env.VITE_API_URL
+  || `http://${window.location.hostname}:8080/api`;
+
+const API = axios.create({ baseURL });
 
 // Intercepteur : ajoute automatiquement le token JWT
 // à chaque requête sortante
@@ -20,7 +22,6 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expiré → déconnexion automatique
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/connexion';
