@@ -2,10 +2,9 @@ import axios from 'axios';
 
 // Priorité : variable d'environnement (production/Vercel) définie via VITE_API_URL.
 // À défaut (développement local/LAN), on déduit l'hôte automatiquement.
-const baseURL = import.meta.env.VITE_API_URL
-  || `http://${window.location.hostname}:8080/api`;
+const BASE_URL = import.meta.env.VITE_API_URL || `http://localhost:8080/api`;
 
-const API = axios.create({ baseURL });
+const API = axios.create({ BASE_URL });
 
 // Intercepteur : ajoute automatiquement le token JWT
 // à chaque requête sortante

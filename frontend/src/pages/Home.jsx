@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getTarifs } from '../api/tarifService';
 import { getCatalogue } from '../api/accessoireService';
 
-const BASE_FICHIERS = `http://${window.location.hostname}:8080`;
+const BASE_FICHIERS = import.meta.env.VITE_API_URL || `http://localhost:8080`;
 
 export default function Home() {
   const { user } = useAuth();

@@ -8,7 +8,7 @@ import {
   validerPanier,
 } from '../../api/panierService';
 
-const BASE_FICHIERS = `http://${window.location.hostname}:8080`;
+const BASE_FICHIERS = import.meta.env.VITE_API_URL || `http://localhost:8080`;
 
 export default function Boutique() {
   const [catalogue, setCatalogue] = useState([]);
