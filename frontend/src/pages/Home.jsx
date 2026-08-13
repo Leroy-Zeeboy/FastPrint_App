@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getTarifs } from '../api/tarifService';
 import { getCatalogue } from '../api/accessoireService';
 
-const BASE_FICHIERS = 'http://localhost:8080';
+const BASE_FICHIERS = `http://${window.location.hostname}:8080`;
 
 export default function Home() {
   const { user } = useAuth();
@@ -470,7 +470,9 @@ export default function Home() {
               <h3 className="text-lg font-bold text-gray-900 mb-2">Téléphone / WhatsApp</h3>
               <p className="text-gray-600 text-sm mb-4">Notre équipe est disponible pour répondre à vos questions.</p>
               <a href="tel:+237600000000" className="text-primary font-bold hover:underline">
-                +237 6 00 00 00 00
+                <tr>+237 686-388-948</tr><br />
+                <tr>+237 693-529-925</tr><br />
+                <tr>+237 655-543-443</tr>
               </a>
             </div>
 
@@ -482,7 +484,7 @@ export default function Home() {
               <h3 className="text-lg font-bold text-gray-900 mb-2">Adresse E-mail</h3>
               <p className="text-gray-600 text-sm mb-4">Envoyez-nous vos requêtes spécifiques par courriel.</p>
               <a href="mailto:contact@fastprint.cm" className="text-primary font-bold hover:underline">
-                contact@fastprint.cm
+                djaoweleroy88@gmail.com
               </a>
             </div>
 
@@ -494,7 +496,7 @@ export default function Home() {
               <h3 className="text-lg font-bold text-gray-900 mb-2">Notre Localisation</h3>
               <p className="text-gray-600 text-sm mb-4">Point de retrait principal pour vos impressions physiques.</p>
               <span className="text-gray-800 font-semibold text-sm">
-                Douala, Cameroun
+                Ambam, Sud-Cameroun
               </span>
             </div>
           </div>
