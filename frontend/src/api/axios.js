@@ -1,13 +1,9 @@
 import axios from 'axios';
 
-// Priorité : variable d'environnement (production/Vercel) définie via VITE_API_URL.
-// À défaut (développement local/LAN), on déduit l'hôte automatiquement.
 const BASE_URL = import.meta.env.VITE_API_URL || `http://localhost:8080/api`;
 
-const API = axios.create({ BASE_URL });
+const API = axios.create({ baseURL: BASE_URL });
 
-// Intercepteur : ajoute automatiquement le token JWT
-// à chaque requête sortante
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -16,7 +12,6 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// Intercepteur : gère les erreurs globalement
 API.interceptors.response.use(
   (response) => response,
   (error) => {
