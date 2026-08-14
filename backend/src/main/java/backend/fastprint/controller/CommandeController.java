@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/commandes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CommandeController {
 
     private final CommandeService commandeService;

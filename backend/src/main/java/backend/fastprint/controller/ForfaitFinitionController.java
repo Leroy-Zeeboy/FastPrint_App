@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/forfaits")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ForfaitFinitionController {
 
     private final ForfaitFinitionService forfaitFinitionService;

@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tarifs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class TarifController {
 
     private final TarifService tarifService;

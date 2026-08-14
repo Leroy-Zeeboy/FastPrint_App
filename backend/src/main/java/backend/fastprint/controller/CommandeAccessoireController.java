@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/commandes-accessoires")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CommandeAccessoireController {
 
     private final CommandeAccessoireService commandeAccessoireService;
