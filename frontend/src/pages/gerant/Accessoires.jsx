@@ -56,7 +56,13 @@ export default function Accessoires() {
       quantiteStock: accessoire.quantiteStock,
     });
     setImageFichier(null);
-    setImageApercu(accessoire.imageUrl ? BASE_FICHIERS + accessoire.imageUrl : null);
+    setImageApercu(
+      accessoire.imageUrl
+        ? (accessoire.imageUrl.startsWith('http')
+            ? accessoire.imageUrl
+            : BASE_FICHIERS + accessoire.imageUrl)
+        : null
+    );
     setErreur('');
     setFormOuvert(true);
   };
@@ -172,7 +178,11 @@ export default function Accessoires() {
                               justify-center overflow-hidden mb-3">
                 {accessoire.imageUrl ? (
                   <img
-                    src={BASE_FICHIERS + accessoire.imageUrl}
+                    src={
+                      accessoire.imageUrl.startsWith('http')
+                        ? accessoire.imageUrl
+                        : BASE_FICHIERS + accessoire.imageUrl
+                    }
                     alt={accessoire.nom}
                     className="w-full h-full object-cover"
                   />

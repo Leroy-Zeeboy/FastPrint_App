@@ -163,7 +163,11 @@ export default function Boutique() {
                               items-center justify-center overflow-hidden mb-3">
                 {article.imageUrl ? (
                   <img
-                    src={BASE_FICHIERS + article.imageUrl}
+                    src={
+                      article.imageUrl.startsWith('http')
+                        ? article.imageUrl
+                        : BASE_FICHIERS + article.imageUrl
+                    }
                     alt={article.nom}
                     className="w-full h-full object-cover"
                   />

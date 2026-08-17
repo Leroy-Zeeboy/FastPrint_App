@@ -400,7 +400,7 @@ export default function Home() {
                   <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl flex items-center justify-center mb-4 text-2xl overflow-hidden">
                     {accessoire.imageUrl ? (
                       <img
-                        src={BASE_FICHIERS + accessoire.imageUrl}
+                        src={accessoire.imageUrl?.startsWith('http') ? accessoire.imageUrl : BASE_FICHIERS + accessoire.imageUrl}
                         alt={accessoire.nom}
                         className="w-full h-full object-cover"
                       />
