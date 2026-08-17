@@ -28,15 +28,9 @@ public class DocumentController {
             @Valid @ModelAttribute DocumentRequest request,
             @AuthenticationPrincipal Utilisateur client) {
 
-        String nomFichier = fichier.getOriginalFilename();
-        String typeFichier = nomFichier != null && nomFichier.contains(".")
-                ? nomFichier.substring(nomFichier.lastIndexOf(".") + 1)
-                : "inconnu";
-
         DocumentResponse response = documentService.deposerDocument(
-            request, client, nomFichier, typeFichier
+            request, client, fichier
         );
-
         return ResponseEntity.ok(
             ApiResponse.success("Document déposé avec succès", response)
         );
@@ -49,6 +43,16 @@ public class DocumentController {
         return ResponseEntity.ok(
             ApiResponse.success("Documents récupérés",
                 documentService.getMesDocuments(client))
+        );
+    }
+
+    // Récupération de l'URL de téléchargement (gérant/administrateur)
+    @GetMapping("/{id}/telecharger")
+    public ResponseEntity<ApiResponse<String>> getUrlTelechargement(
+            @PathVariable("id") Long idDocument) {
+        String url = documentService.getCheminFichier(idDocument);
+        return ResponseEntity.ok(
+            ApiResponse.success("URL de téléchargement récupérée", url)
         );
     }
 }

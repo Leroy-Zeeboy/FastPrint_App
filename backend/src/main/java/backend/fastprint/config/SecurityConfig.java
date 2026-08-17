@@ -64,6 +64,8 @@ public class SecurityConfig {
     .requestMatchers(HttpMethod.GET, "/api/options-finition").permitAll()
     .requestMatchers(HttpMethod.GET, "/api/options-finition/**").permitAll()
     .requestMatchers("/api/options-finition/admin/**").hasRole("ADMINISTRATEUR")
+    // Téléchargement d'un document par le gérant/administrateur
+    .requestMatchers(HttpMethod.GET, "/api/documents/*/telecharger").hasAnyRole("GERANT", "ADMINISTRATEUR")
     .requestMatchers("/api/documents/**").authenticated()
     .requestMatchers("/api/commandes/en-attente").hasAnyRole("GERANT", "ADMINISTRATEUR")
     .requestMatchers(HttpMethod.PUT, "/api/commandes/*/traiter").hasAnyRole("GERANT", "ADMINISTRATEUR")
@@ -86,15 +88,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Remplacez par le port exact de votre serveur de dev React (3000, 5173, etc.)
+
         configuration.setAllowedOrigins(List.of(
     "http://localhost:3000",
     "http://localhost:5173",
     "http://192.168.100.199:5173",
     "https://fast-print-app.vercel.app"
 ));
-        
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization"));

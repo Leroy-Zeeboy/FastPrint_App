@@ -8,7 +8,9 @@ import backend.fastprint.entity.Tarif.Disposition;
 import backend.fastprint.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +24,7 @@ public class DocumentService {
     private final ForfaitFinitionRepository forfaitFinitionRepository;
     private final OptionFinitionRepository optionFinitionRepository;
     private final CommandeRepository commandeRepository;
+    private final CloudinaryService cloudinaryService;
 
     // Délai de conservation par défaut : 3 jours
     private static final int DELAI_CONSERVATION_JOURS = 3;
@@ -29,8 +32,20 @@ public class DocumentService {
     public DocumentResponse deposerDocument(
             DocumentRequest request,
             Utilisateur client,
-            String nomFichier,
-            String typeFichier) {
+            MultipartFile fichier) {
+
+        String nomFichier = fichier.getOriginalFilename();
+        String typeFichier = nomFichier != null && nomFichier.contains(".")
+                ? nomFichier.substring(nomFichier.lastIndexOf(".") + 1)
+                : "inconnu";
+
+        // 0. Upload du fichier vers Cloudinary (persistant, contrairement au disque Render)
+        String cheminFichier;
+        try {
+            cheminFichier = cloudinaryService.uploadFichier(fichier, "documents");
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'upload du fichier", e);
+        }
 
         // 1. Récupérer le tarif correspondant
         TypeImpression typeImpression = TypeImpression.valueOf(request.getTypeImpression());
@@ -65,6 +80,7 @@ public class DocumentService {
                 .client(client)
                 .nomFichier(nomFichier)
                 .typeFichier(typeFichier)
+                .cheminFichier(cheminFichier)
                 .nombrePages(request.getNombrePages())
                 .tarif(tarif)
                 .forfaitFinition(forfait)
@@ -96,16 +112,13 @@ public class DocumentService {
             ForfaitFinition forfait,
             List<OptionFinition> options) {
 
-        // Sous-total impression
         BigDecimal montant = tarif.getPrixUnitaire()
                 .multiply(BigDecimal.valueOf(nombrePages));
 
-        // Forfait de finition (standard ou premium)
         if (forfait != null) {
             montant = montant.add(forfait.getPrix());
         }
 
-        // Options unitaires à la carte
         for (OptionFinition option : options) {
             montant = montant.add(option.getSurCout());
         }
@@ -115,6 +128,12 @@ public class DocumentService {
 
     public List<Document> getMesDocuments(Utilisateur client) {
         return documentRepository.findByClient(client);
+    }
+
+    public String getCheminFichier(Long idDocument) {
+        Document doc = documentRepository.findById(idDocument)
+                .orElseThrow(() -> new RuntimeException("Document introuvable"));
+        return doc.getCheminFichier();
     }
 
     private DocumentResponse toResponse(Document document, BigDecimal montant) {
