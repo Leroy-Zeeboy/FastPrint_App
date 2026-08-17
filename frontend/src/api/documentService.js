@@ -6,3 +6,8 @@ export const deposerDocument = (formData) =>
   });
 
 export const getMesDocuments = () => API.get('/documents/mes-documents');
+
+export const getUrlTelechargement = (idDocument) =>
+  API.get(`/documents/${idDocument}/telecharger`);
+
+

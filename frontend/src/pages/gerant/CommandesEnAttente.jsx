@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getCommandesEnAttente, traiterCommande } from '../../api/commandeService';
+import { getUrlTelechargement } from '../../api/documentService';
 
 export default function CommandesEnAttente() {
   const [commandes, setCommandes] = useState([]);
@@ -7,6 +8,7 @@ export default function CommandesEnAttente() {
   const [commandeActive, setCommandeActive] = useState(null); // pour la modale de refus
   const [motifRefus, setMotifRefus] = useState('');
   const [enCours, setEnCours] = useState(null); // id de la commande en traitement
+  const [telechargementEnCours, setTelechargementEnCours] = useState(null); // id du document
 
   const charger = async () => {
     try {
@@ -58,6 +60,21 @@ export default function CommandesEnAttente() {
       alert(err.response?.data?.message || 'Erreur lors du refus.');
     } finally {
       setEnCours(null);
+    }
+  };
+
+  const handleTelecharger = async (idDocument) => {
+    setTelechargementEnCours(idDocument);
+    try {
+      const res = await getUrlTelechargement(idDocument);
+      const url = res.data.data;
+      // Ouvre le fichier Cloudinary dans un nouvel onglet (téléchargement direct)
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Erreur lors du téléchargement.');
+    } finally {
+      setTelechargementEnCours(null);
     }
   };
 
@@ -160,6 +177,19 @@ export default function CommandesEnAttente() {
                   {commande.commentaireClient}
                 </div>
               )}
+
+              {/* Bouton de téléchargement du document */}
+              <button
+                onClick={() => handleTelecharger(commande.idDocument)}
+                disabled={telechargementEnCours === commande.idDocument}
+                className="w-full mb-3 bg-blue-50 border-2 border-blue-200
+                           text-blue-700 rounded-xl py-3 font-semibold
+                           hover:bg-blue-100 transition disabled:opacity-60"
+              >
+                {telechargementEnCours === commande.idDocument
+                  ? 'Ouverture...'
+                  : '📥 Télécharger le document'}
+              </button>
 
               <div className="flex gap-3">
                 <button
