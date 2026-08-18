@@ -9,19 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AccessoireService {
 
     private final AccessoireRepository accessoireRepository;
-
-    private static final String DOSSIER_UPLOAD = "uploads/accessoires";
+    private final CloudinaryService cloudinaryService;
 
     // Catalogue public — tous les accessoires actifs
     public List<Accessoire> getCatalogue() {
@@ -94,26 +89,10 @@ public class AccessoireService {
         accessoireRepository.save(accessoire);
     }
 
-    // Enregistre le fichier image sur disque et renvoie le chemin public (relatif)
+    // Upload l'image vers Cloudinary et renvoie son URL publique permanente
     private String enregistrerImage(MultipartFile image) {
         try {
-            Path dossier = Paths.get(DOSSIER_UPLOAD);
-            if (!Files.exists(dossier)) {
-                Files.createDirectories(dossier);
-            }
-
-            String extension = "";
-            String nomOriginal = image.getOriginalFilename();
-            if (nomOriginal != null && nomOriginal.contains(".")) {
-                extension = nomOriginal.substring(nomOriginal.lastIndexOf("."));
-            }
-
-            String nomFichier = UUID.randomUUID() + extension;
-            Path destination = dossier.resolve(nomFichier);
-            Files.copy(image.getInputStream(), destination);
-
-            // Chemin public servi par WebConfig (voir /uploads/accessoires/**)
-            return "/uploads/accessoires/" + nomFichier;
+            return cloudinaryService.uploadFichier(image, "accessoires");
         } catch (IOException e) {
             throw new RuntimeException("Erreur lors de l'enregistrement de l'image", e);
         }
