@@ -33,11 +33,13 @@ public class CloudinaryService {
      * @return l'URL publique et permanente du fichier
      */
     public String uploadFichier(MultipartFile fichier, String dossier) throws IOException {
-        Map uploadResult = cloudinary.uploader().upload(
+        String resourceType = "documents".equals(dossier) ? "raw" : "auto";
+
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(
                 fichier.getBytes(),
                 ObjectUtils.asMap(
                         "folder", dossier,
-                        "resource_type", "auto" // détecte automatiquement image / pdf / autre
+                        "resource_type", resourceType
                 )
         );
         return (String) uploadResult.get("secure_url");
